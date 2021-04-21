@@ -1,0 +1,56 @@
+name: flowers
+services:
+  api:
+    image: okteto.dev/api:latest
+    build: api
+    command: sh -c "./init-db.sh && gunicorn flowers.wsgi:application --bind 0.0.0.0:8080"
+    environment:
+      - DJANGO_ENV=production
+      - SECRET_KEY=secret
+      - DEBUG="0"
+      - DJANGO_ADMIN_USER=admin
+      - DJANGO_ADMIN_EMAIL=admin@okteto.com
+      - DJANGO_ADMIN_PASSWORD=okteto
+      - DB_ENGINE=django.db.backends.postgresql
+      - DB_DATABASE=prediction
+      - DB_USER=admin
+      - DB_PASSWORD=okteto
+      - DB_HOST=postgres
+      - DB_PORT=5432
+    ports:
+      - 8080
+    resources:
+      cpu: 1.5
+      memory: 3Gi
+
+  postgres:
+    image: postgres:12.0-alpine
+    ports:
+      - 5432
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=okteto
+      - POSTGRES_DB=prediction
+    volumes:
+      - /var/lib/postgresql/data
+
+  frontend:
+    image: okteto.dev/frontend:latest
+    ports:
+      - 80
+    build: frontend
+    resources:
+      cpu: 1.5
+      memory: 3Gi
+
+endpoints:
+  flowers:
+    annotations:
+      dev.okteto.com/generate-host: "true"
+    rules:
+      - path: /
+        service: frontend
+        port: 80
+      - path: /api
+        service: api
+        port: 8080

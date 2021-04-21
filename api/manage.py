@@ -18,7 +18,7 @@ def main():
 
     if not os.getenv("RUN_MAIN"):
       import debugpy
-      debugpy.listen(("0.0.0.0", 5678))
+      debugpy.listen(("0.0.0.0", 8080))
     execute_from_command_line(sys.argv)
 
 
